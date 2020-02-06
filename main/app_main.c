@@ -128,8 +128,7 @@ static void initialise_wifi(void)
 }
 #endif
 
-#define MAX_HTTP_RECV_BUFFER 512
-static const char *TAG = "HTTP_CLIENT";
+
 
 /* Root cert for howsmyssl.com, taken from howsmyssl_com_root_cert.pem
 
@@ -144,75 +143,31 @@ static const char *TAG = "HTTP_CLIENT";
 extern const char howsmyssl_com_root_cert_pem_start[] asm("_binary_howsmyssl_com_root_cert_pem_start");
 extern const char howsmyssl_com_root_cert_pem_end[]   asm("_binary_howsmyssl_com_root_cert_pem_end");
 
-esp_err_t _http_event_handler(esp_http_client_event_t *evt)
-{
-    switch(evt->event_id) {
-        case HTTP_EVENT_ERROR:
-            ESP_LOGD(TAG, "HTTP_EVENT_ERROR");
-            break;
-        case HTTP_EVENT_ON_CONNECTED:
-            ESP_LOGD(TAG, "HTTP_EVENT_ON_CONNECTED");
-            break;
-        case HTTP_EVENT_HEADER_SENT:
-            ESP_LOGD(TAG, "HTTP_EVENT_HEADER_SENT");
-            break;
-        case HTTP_EVENT_ON_HEADER:
-            ESP_LOGD(TAG, "HTTP_EVENT_ON_HEADER, key=%s, value=%s", evt->header_key, evt->header_value);
-            break;
-        case HTTP_EVENT_ON_DATA:
-            ESP_LOGD(TAG, "HTTP_EVENT_ON_DATA, len=%d", evt->data_len);
-            if (!esp_http_client_is_chunked_response(evt->client)) {
-                // Write out data
-                // printf("%.*s", evt->data_len, (char*)evt->data);
-            }
 
-            break;
-        case HTTP_EVENT_ON_FINISH:
-            ESP_LOGD(TAG, "HTTP_EVENT_ON_FINISH");
-            break;
-        case HTTP_EVENT_DISCONNECTED:
-            ESP_LOGD(TAG, "HTTP_EVENT_DISCONNECTED");
-            break;
-    }
-    return ESP_OK;
-}
-static void at_rpc_task(){
-    while(true){
-        printf("launch at_rpc_task\n");
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
-    }
+
+//     while (1) {
+//         // Read data from the UART
+//         int len = uart_read_bytes(esp_at_uart_port, idata, 1024,portTICK_RATE_MS);
+//         if(len>0)
+//             http_rest();
+//         // Write data back to the UART
+//         //uart_write_bytes(esp_at_uart_port,(char*)idata, len);
+//     }
+//
+
+
+
+
+// static void at_rpc_task(){
+//     while(true){
+//         vTaskDelay(5000 / portTICK_PERIOD_MS);
+//         printf("launch at_rpc_task\n");
+//         http_rest(); 
+//     }
      
-     vTaskDelete(NULL);
-}
+//      vTaskDelete(NULL);
+// }
 
-static void http_rest()
-{
-    esp_http_client_config_t config = {
-        .url = "http://10.214.69.158:3000/echo",
-        .event_handler = _http_event_handler,
-    };
-    esp_http_client_handle_t client = esp_http_client_init(&config);
-    // // GET
-    esp_err_t err = esp_http_client_perform(client);
-
-    // POST
-    const char *post_data = "field1=value1&field2=value2";
-    esp_http_client_set_url(client, "http://10.214.69.158:3000/echo");
-    esp_http_client_set_method(client, HTTP_METHOD_POST);
-    esp_http_client_set_post_field(client, post_data, strlen(post_data));
-    err = esp_http_client_perform(client);
-    if (err == ESP_OK) {
-        printf("OK %d, %d \n", esp_http_client_get_status_code(client),esp_http_client_get_content_length(client));
-        printf("%s\n",esp_http_client_get_response_buffer(client));
-        // ESP_LOGI(TAG, "HTTP POST Status = %d, content_length = %d",
-        //         esp_http_client_get_status_code(client),
-        //         esp_http_client_get_content_length(client));
-    } else {
-        //ESP_LOGE(TAG, "HTTP POST request failed: %d", err);
-    }
-
-    esp_http_client_cleanup(client);
-}
 static const uart_port_t esp_at_uart_port = 0;
 
 void app_main()
@@ -262,17 +217,9 @@ void app_main()
 
     uint8_t *idata = (uint8_t *) malloc(1024);
 
-//     while (1) {
-//         // Read data from the UART
-//         int len = uart_read_bytes(esp_at_uart_port, idata, 1024,portTICK_RATE_MS);
-//         if(len>0)
-//             http_rest();
-//         // Write data back to the UART
-//         //uart_write_bytes(esp_at_uart_port,(char*)idata, len);
-//     }
-// /*
+ 
 
-int rv = xTaskCreate(at_rpc_task, "at_rpc_task", 4096, NULL, 5, NULL);
+//int rv = xTaskCreate(at_rpc_task, "at_rpc_task", 4096, NULL, 5, NULL);
 
 #ifdef CONFIG_AT_BASE_COMMAND_SUPPORT
     if(esp_at_base_cmd_regist() == false) {
