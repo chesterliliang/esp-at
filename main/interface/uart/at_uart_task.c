@@ -32,6 +32,8 @@
 #include "nvs.h"
 #include "nvs_flash.h"
 
+#include "esp_log.h"
+
 #ifdef CONFIG_AT_BASE_ON_UART
 #include "esp_system.h"
 #include "driver/gpio.h"
@@ -80,8 +82,10 @@ static bool at_nvm_uart_config_get (at_nvm_uart_config_struct *uart_config);
 static int32_t at_port_write_data(uint8_t*data,int32_t len)
 {
     uint32_t length = 0;
+    //esp_at_port_write_data((uint8_t *)"\r\nat_port_write_data\r\n",strlen("\r\nchester\r\n"));
 
     length = uart_write_bytes(esp_at_uart_port,(char*)data,len);
+   // printf("write\r\n");
     return length;
 }
 
@@ -90,7 +94,8 @@ static int32_t at_port_read_data(uint8_t*buf,int32_t len)
     TickType_t ticks_to_wait = portTICK_RATE_MS;
     uint8_t *data = NULL;
     size_t size = 0;
-
+    //esp_at_port_write_data((uint8_t *)"\r\nat_port_read_data\r\n",strlen("\r\nchester\r\n"));
+    
     if (len == 0) {
         return 0;
     }
@@ -110,13 +115,20 @@ static int32_t at_port_read_data(uint8_t*buf,int32_t len)
         data = (uint8_t *)malloc(len);
         if (data) {
             len = uart_read_bytes(esp_at_uart_port,data,len,ticks_to_wait);
+           // printf("read len = %d %s", len, data);
+            //http_rest();
+            //printf("xxx\n");
             free(data);
             return len;
         } else {
             return -1;
         }
     } else {
-        return uart_read_bytes(esp_at_uart_port,buf,len,ticks_to_wait);
+        len = uart_read_bytes(esp_at_uart_port,buf,len,ticks_to_wait);
+        // printf("read len = %d %s", len, buf);
+        //http_rest();
+        //printf("xxx\n");
+        return len;
     }
 }
 
@@ -605,7 +617,11 @@ void at_interface_init (void)
 
 void at_custom_init(void)
 {
+    //static const char *TAG="at_custom_init";
     esp_at_custom_cmd_array_regist (at_custom_cmd, sizeof(at_custom_cmd)/sizeof(at_custom_cmd[0]));
     esp_at_port_write_data((uint8_t *)"\r\nready\r\n",strlen("\r\nready\r\n"));
+    //esp_at_port_write_data((uint8_t *)"\r\nchester\r\n",strlen("\r\nchester\r\n"));
+    //ESP_LOGI(TAG, "xxx_xxxx %d", 10);
+    //printf("at_custom_init\r\n");
 }
 #endif
