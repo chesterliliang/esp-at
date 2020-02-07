@@ -4,7 +4,14 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-static uint8_t at_queryCmdRpcBalance(uint8_t *cmd_name);
+void web3_init();
+uint8_t at_setupCmd_RpcSetNodeUrl(uint8_t para_num);
+uint8_t at_setupCmd_RpcBalance(uint8_t para_num);
+uint8_t at_setupCmd_RpcGasPrice(uint8_t para_num);
+uint8_t at_setupCmd_RpcGetTransactionCount(uint8_t para_num);
+uint8_t at_setupCmd_RpcSendRawTransaction(uint8_t para_num);
+uint8_t at_setupCmd_RpcGetTransactionReceipt(uint8_t para_num);
+
 #ifdef __cplusplus
 }
 #endif

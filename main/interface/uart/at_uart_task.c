@@ -31,9 +31,6 @@
 #include "esp_at.h"
 #include "nvs.h"
 #include "nvs_flash.h"
-#include "esp_http_client.h"
-
-#include "esp_log.h"
 
 #include "web3.h"
 
@@ -80,75 +77,6 @@ static const uart_port_t esp_at_uart_port = CONFIG_AT_UART_PORT;
 
 static bool at_nvm_uart_config_set (at_nvm_uart_config_struct *uart_config);
 static bool at_nvm_uart_config_get (at_nvm_uart_config_struct *uart_config);
-#define MAX_HTTP_RECV_BUFFER 512
-static const char *TAG = "HTTP_CLIENT";
-
-esp_err_t _http_event_handler(esp_http_client_event_t *evt)
-{
-    switch(evt->event_id) {
-        case HTTP_EVENT_ERROR:
-            ESP_LOGD(TAG, "HTTP_EVENT_ERROR");
-            break;
-        case HTTP_EVENT_ON_CONNECTED:
-            ESP_LOGD(TAG, "HTTP_EVENT_ON_CONNECTED");
-            break;
-        case HTTP_EVENT_HEADER_SENT:
-            ESP_LOGD(TAG, "HTTP_EVENT_HEADER_SENT");
-            break;
-        case HTTP_EVENT_ON_HEADER:
-            ESP_LOGD(TAG, "HTTP_EVENT_ON_HEADER, key=%s, value=%s", evt->header_key, evt->header_value);
-            break;
-        case HTTP_EVENT_ON_DATA:
-            ESP_LOGD(TAG, "HTTP_EVENT_ON_DATA, len=%d", evt->data_len);
-            if (!esp_http_client_is_chunked_response(evt->client)) {
-                // Write out data
-                // printf("%.*s", evt->data_len, (char*)evt->data);
-            }
-
-            break;
-        case HTTP_EVENT_ON_FINISH:
-            ESP_LOGD(TAG, "HTTP_EVENT_ON_FINISH");
-            break;
-        case HTTP_EVENT_DISCONNECTED:
-            ESP_LOGD(TAG, "HTTP_EVENT_DISCONNECTED");
-            break;
-    }
-    return ESP_OK;
-}
-void http_rest()
-{
-    esp_http_client_config_t config = {
-        .url = "https://mainnet.infura.io",
-        .event_handler = _http_event_handler,
-    };
-    esp_http_client_handle_t client = esp_http_client_init(&config);
-    // // GET
-    esp_err_t err = esp_http_client_perform(client);
-
-    // POST
-    const char *post_data = "{\"jsonrpc\":\"2.0\",\"method\":\"eth_getBalance\",\"params\":[\"0xc94770007dda54cF92009BFF0dE90c06F603a09f\", \"latest\"],\"id\":1}";
-    //esp_http_client_set_url(client, "http://10.214.69.158:3000/echo");
-    esp_http_client_set_url(client, "https://mainnet.infura.io");
-    esp_http_client_set_method(client, HTTP_METHOD_POST);
-    esp_http_client_set_post_field(client, post_data, strlen(post_data));
-    esp_http_client_clear_response_buffer(client);
-    err = esp_http_client_perform(client);
-    if (err == ESP_OK) {
-        printf("OK %d, %d \n", esp_http_client_get_status_code(client),esp_http_client_get_content_length(client));
-        printf("%s\n",esp_http_client_get_response_buffer(client));
-    } else {
-        printf("HTTP POST request failed: %d", err);
-    }
-
-    esp_http_client_cleanup(client);
-}
-
-static uint8_t at_queryCmdRpcBalance(uint8_t *cmd_name)
-{
-    http_rest();
-    esp_at_response_result(ESP_AT_RESULT_CODE_OK);
-    return ESP_AT_RESULT_CODE_PROCESS_DONE;
-}
 
 
 static int32_t at_port_write_data(uint8_t*data,int32_t len)
@@ -629,7 +557,7 @@ static esp_at_cmd_struct at_custom_cmd[] = {
     {"+UART_CUR", NULL, at_queryCmdUart, at_setupCmdUart, NULL},
     {"+UART_DEF", NULL, at_queryCmdUartDef, at_setupCmdUartDef, NULL},
     {"+RPC", NULL, at_queryCmdRpcTest, at_setupCmdRpcTest,NULL},
-    {"+RPCBALANCE", NULL, at_queryCmdRpcBalance, NULL,NULL},
+    {"+RPCBALANCE", NULL, NULL, at_setupCmd_RpcBalance,NULL},
 };
 
 void at_status_callback (esp_at_status_type status)
@@ -689,6 +617,7 @@ void at_interface_init (void)
 
 void at_custom_init(void)
 {
+    web3_init();
     esp_at_custom_cmd_array_regist (at_custom_cmd, sizeof(at_custom_cmd)/sizeof(at_custom_cmd[0]));
     esp_at_port_write_data((uint8_t *)"\r\nready\r\n",strlen("\r\nready\r\n"));
 }
