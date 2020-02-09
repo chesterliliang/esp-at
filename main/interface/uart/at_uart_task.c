@@ -558,6 +558,11 @@ static esp_at_cmd_struct at_custom_cmd[] = {
     {"+UART_DEF", NULL, at_queryCmdUartDef, at_setupCmdUartDef, NULL},
     {"+RPC", NULL, at_queryCmdRpcTest, at_setupCmdRpcTest,NULL},
     {"+RPCBALANCE", NULL, NULL, at_setupCmd_RpcBalance,NULL},
+    {"+RPCDBG", NULL, NULL, at_setupCmd_RpcSetDbg,NULL},
+    {"+RPCGASPRICE", NULL, NULL, at_setupCmd_RpcGasPrice,NULL},
+    {"+RPCNONCE", NULL, NULL, at_setupCmd_RpcGetTransactionCount,NULL},
+    {"+RPCBROADCAST", NULL, NULL, at_setupCmd_RpcSendRawTransaction,NULL},
+    {"+RPCRECEIPT", NULL, NULL, at_setupCmd_RpcGetTransactionReceipt,NULL},
 };
 
 void at_status_callback (esp_at_status_type status)

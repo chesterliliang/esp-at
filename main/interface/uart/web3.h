@@ -5,6 +5,7 @@
 extern "C" {
 #endif
 void web3_init();
+uint8_t at_setupCmd_RpcSetDbg(uint8_t para_num);
 uint8_t at_setupCmd_RpcSetNodeUrl(uint8_t para_num);
 uint8_t at_setupCmd_RpcBalance(uint8_t para_num);
 uint8_t at_setupCmd_RpcGasPrice(uint8_t para_num);
