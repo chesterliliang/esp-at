@@ -5,6 +5,7 @@
 
 ifdef CONFIG_AT_BASE_ON_UART 
 COMPONENT_SRCDIRS += interface/uart
+COMPONENT_SRCDIRS += interface/uart/web3
 endif
 
 ifdef CONFIG_AT_BASE_ON_HSPI 

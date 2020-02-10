@@ -1,4 +1,3 @@
-#include "web3_def.h"
 #include "esp_http_client.h"
 #include "web3_http.h"
 
@@ -31,15 +30,21 @@ uint32_t http_post(const char* url, const char* post_data, char* result){
     esp_http_client_set_method(client, HTTP_METHOD_POST);
     esp_http_client_set_post_field(client, post_data, strlen(post_data));
     esp_http_client_clear_response_buffer(client);
+    memset(result,0,MAX_HTTP_RECV_BUFFER);
     err = esp_http_client_perform(client);
     if (err == ESP_OK) {
             int content_length = esp_http_client_get_content_length(client);
+            if(content_length==0){
+                return WEB3_HTTP_NULL;
+            }
+            if(content_length>MAX_HTTP_RECV_BUFFER){
+                return WEB3_HTTP_TOOLONG;
+            }
             uint32_t total_len = strlen(esp_http_client_get_response_buffer(client));
             char* total =  esp_http_client_get_response_buffer(client);
             memcpy(result,total+total_len - content_length,content_length);
     }
     else {
-        w3printf("HTTP POST request failed: %d", err);
         return WEB3_HTTP_FAIL;
     }
     esp_http_client_cleanup(client);

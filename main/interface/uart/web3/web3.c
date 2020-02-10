@@ -1,8 +1,3 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdint.h>
-#include <stdbool.h>
 #include "esp_at.h"
 #include "esp_log.h"
 #include "cJSON.h"
@@ -34,7 +29,7 @@ void w3printf(const char *cmd, ...)
         "https://mainnet.infura.io",
 */ 
 
-void web3_init(){
+void web3Init(){
     g_node_url = (char*)malloc(MAX_NODE_URL_LEN);
     g_dbg_print = false;
     strcpy(g_node_url,"https://mainnet.infura.io");
@@ -53,34 +48,68 @@ void web3SetDbg(uint32_t dbg){
 }
 
 uint8_t web3Balance(uint8_t* addr, uint8_t* result){
-
-    cJSON *params;
-    char** string = params_helper(addr,true,params);
+    cJSON *params = params_helper((char*)addr,true, false, NULL);
     post_json_helper("eth_getBalance",params, 1, send_string);
-    free(string);
-    cJSON_Delete(params);
-
+    params_helper(NULL,false,true, params);
+    w3printf("web3Balance url %s \n send_string %s \n", g_node_url, send_string);
     uint32_t rv = http_post(g_node_url,send_string,result_string);
     if(rv!=WEB3_OK){
         return rv;
-    }
-    
-    result_json_helper(result_string,result);
+    }  
+    result_json_helper(result_string,(char*)result);
     return WEB3_OK;
 }
 
 uint8_t web3GasPrice(uint8_t* result){
+    post_json_helper("eth_gasPrice",NULL, 73, send_string);
+    w3printf("eth_gasPrice url %s  \n send_string %s  \n", g_node_url, send_string);
+    uint32_t rv = http_post(g_node_url,send_string,result_string);
+    if(rv!=WEB3_OK){
+        return rv;
+    }
+    result_json_helper(result_string,(char*)result);
     return WEB3_OK;
 }
 
 uint8_t web3GetTransactionCount(uint8_t* addr, uint8_t* result){
+    cJSON *params = params_helper((char*)addr,true, false, NULL);
+    post_json_helper("eth_getTransactionCount",params, 1, send_string);
+    params_helper(NULL,false,true, params);
+    w3printf("web3GetTransactionCount url %s  \n send_string %s \n", g_node_url, send_string);
+    uint32_t rv = http_post(g_node_url,send_string,result_string);
+    if(rv!=WEB3_OK){
+        return rv;
+    }
+    result_json_helper(result_string,(char*)result);
     return WEB3_OK;
 }
 
 uint8_t web3SendRawTransaction(uint8_t* tx, uint8_t* result){
+    cJSON *params = params_helper((char*)tx,false, false, NULL);
+    post_json_helper("eth_sendRawTransaction",params, 1, send_string);
+    params_helper(NULL,false,true, params);
+    w3printf("web3SendRawTransaction url %s \n send_string %s \n", g_node_url, send_string);
+    uint32_t rv = http_post(g_node_url,send_string,result_string);
+    if(rv!=WEB3_OK){
+        return rv;
+    }
+    result_json_helper(result_string,(char*)result);
     return WEB3_OK;
 }
 
-uint8_t web3GetTransactionReceipt(uint8_t* addr, uint8_t* result){
-    return ESP_AT_RESULT_CODE_OK;
+uint8_t web3GetTransactionReceipt(uint8_t* txid, uint8_t* result){
+    cJSON *params = params_helper((char*)txid,false, false, NULL);
+    post_json_helper("eth_getTransactionByHash",params, 1, send_string);
+    params_helper(NULL,false,true, params);
+    w3printf("eth_getTransactionReceipt url %s \n send_string %s \n", g_node_url, send_string);
+    uint32_t rv = http_post(g_node_url,send_string,result_string);
+    if(rv==WEB3_HTTP_TOOLONG){
+        strcpy((char*)result, (const char*)"YES");
+        return WEB3_OK;
+    }
+    if(rv!=WEB3_OK){
+        return rv;
+    }
+    result_json_helper(result_string,(char*)result);
+    return WEB3_OK;
 }

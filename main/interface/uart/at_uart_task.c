@@ -543,7 +543,6 @@ static uint8_t at_queryCmdUartDef (uint8_t *cmd_name)
     return ESP_AT_RESULT_CODE_OK;
 }
 static uint8_t at_queryCmdRpcTest (uint8_t *cmd_name){
-    esp_at_response_result(ESP_AT_RESULT_CODE_OK);
     return ESP_AT_RESULT_CODE_OK;
 }
 static uint8_t at_setupCmdRpcTest(uint8_t para_num)
@@ -558,11 +557,12 @@ static esp_at_cmd_struct at_custom_cmd[] = {
     {"+UART_DEF", NULL, at_queryCmdUartDef, at_setupCmdUartDef, NULL},
     {"+RPC", NULL, at_queryCmdRpcTest, at_setupCmdRpcTest,NULL},
     {"+RPCBALANCE", NULL, NULL, at_setupCmd_RpcBalance,NULL},
-    {"+RPCDBG", NULL, NULL, at_setupCmd_RpcSetDbg,NULL},
-    {"+RPCGASPRICE", NULL, NULL, at_setupCmd_RpcGasPrice,NULL},
+    {"+RPCGASPRICE", NULL, at_queryCmd_RpcGasPrice, NULL ,NULL},
     {"+RPCNONCE", NULL, NULL, at_setupCmd_RpcGetTransactionCount,NULL},
     {"+RPCBROADCAST", NULL, NULL, at_setupCmd_RpcSendRawTransaction,NULL},
     {"+RPCRECEIPT", NULL, NULL, at_setupCmd_RpcGetTransactionReceipt,NULL},
+    {"+RPCURL", NULL, NULL, at_setupCmd_RpcSetNodeUrl,NULL},
+    {"+RPCDBG", NULL, NULL, at_setupCmd_RpcSetDbg,NULL},
 };
 
 void at_status_callback (esp_at_status_type status)
