@@ -32,7 +32,7 @@
 #include "nvs.h"
 #include "nvs_flash.h"
 
-#include "web3.h"
+#include "web3/web3_cmd.h"
 
 #ifdef CONFIG_AT_BASE_ON_UART
 #include "esp_system.h"
@@ -622,7 +622,7 @@ void at_interface_init (void)
 
 void at_custom_init(void)
 {
-    web3_init();
+    at_cmd_web3_init();
     esp_at_custom_cmd_array_regist (at_custom_cmd, sizeof(at_custom_cmd)/sizeof(at_custom_cmd[0]));
     esp_at_port_write_data((uint8_t *)"\r\nready\r\n",strlen("\r\nready\r\n"));
 }

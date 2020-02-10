@@ -6,6 +6,10 @@
         "string_view": "c",
         "vector": "c",
         "def.h": "c",
-        "freertos.h": "c"
+        "freertos.h": "c",
+        "stdlib.h": "c",
+        "esp_log.h": "c",
+        "stdint.h": "c",
+        "stdio.h": "c"
     }
 }
